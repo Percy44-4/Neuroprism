@@ -28,8 +28,8 @@ class PrecisionGatedCompiler(nn.Module):
         text_gate = reliability.language / (reliability.language + reliability.semantic)
         weight = broadcast_sample_weight(text_gate, language_context)
         context = F.normalize(weight * language_context + (1 - weight) * semantic_context, dim=-1)
-        control = 0.5 * (
-            1 + broadcast_sample_weight(spatial_gate, evidence.spatial.mean) * evidence.spatial.mean
-        )
+        control = 0.5 + broadcast_sample_weight(
+            spatial_gate, evidence.spatial.mean
+        ) * (evidence.spatial.mean - 0.5)
         dynamic = broadcast_sample_weight(dynamic_gate, evidence.dynamic.mean) * evidence.dynamic.mean
         return GatedConditions(context, control, dynamic)
